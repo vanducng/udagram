@@ -3,11 +3,11 @@ This project is to design, deploy, and operate microservices and cloud-native ap
 
 ## Softwares setup
 As experienced with version conflict issues, it's worth noting the softwares' version that work with setup files within this repo.
-* Docker CE: `19.03.8`
-* Docker compose: `1.24.0`
-* KubeOne: `0.11.1`
+* docker: `19.03.8`
+* docker-compose: `1.24.0`
+* kubeone: `0.11.1`
 * kubectl: `1.18.1`
-* Terraform: `0.12.24`
+* terraform: `0.12.24`
 * npm: `6.14.4`
 * node: `8.10.0`
 
