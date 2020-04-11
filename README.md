@@ -73,3 +73,6 @@ As experienced with version conflict issues, it's worth noting the softwares' ve
     ```
 
 ## CI with Travis
+* Install Travis from market place and link to project
+* Prepare the CI/CD plan within `.travis.yml` file in the root of project
+* In every new commit, check the Travis build result.
