@@ -8,7 +8,7 @@ As experienced with version conflict issues, it's worth noting the softwares' ve
 * KubeOne: `0.11.1`
 * kubectl: `1.18.1`
 * Terraform: `0.12.24`
-* NodeJS: `8.10.0`
+* NodeJS: `8.10.0`  
 * NPM: `6.14.4`
 
 ## Setup docker environment
