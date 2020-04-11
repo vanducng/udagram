@@ -72,7 +72,7 @@ As experienced with version conflict issues, it's worth noting the softwares' ve
     kubectl port-forward service/reverseproxy 8100:8100
     ```
 
-## CI with Travis
+## CI/CD with Travis
 * Install Travis from market place and link to project
 * Prepare the CI/CD plan within `.travis.yml` file in the root of project
 * In every new commit, check the Travis build result.
