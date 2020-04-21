@@ -7,7 +7,7 @@ data:
   JWT_SECRET: helloworld
   POSTGRESS_DB: udagramdev
   POSTGRESS_HOST: udagramdev.cf5qlvw5fu9l.us-east-1.rds.amazonaws.com
-  URL: http://localhost:8100  
+  URL: http://localhost:8100 
 metadata:
   name: env-config
   
