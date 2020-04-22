@@ -4,7 +4,7 @@ metadata:
   name: fluentd
   namespace: amazon-cloudwatch
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: fluentd-role
@@ -16,7 +16,7 @@ rules:
       - pods/logs
     verbs: ["get", "list", "watch"]
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: fluentd-role-binding
@@ -41,6 +41,7 @@ data:
     @include containers.conf
     @include systemd.conf
     @include host.conf
+
     <match fluent.**>
       @type null
     </match>
@@ -50,6 +51,7 @@ data:
       @id in_tail_container_logs
       @label @containers
       path /var/log/containers/*.log
+      exclude_path ["/var/log/containers/cloudwatch-agent*", "/var/log/containers/fluentd*"]
       pos_file /var/log/fluentd-containers.log.pos
       tag *
       read_from_head true
@@ -58,11 +60,61 @@ data:
         time_format %Y-%m-%dT%H:%M:%S.%NZ
       </parse>
     </source>
+
+    <source>
+      @type tail
+      @id in_tail_cwagent_logs
+      @label @cwagentlogs
+      path /var/log/containers/cloudwatch-agent*
+      pos_file /var/log/cloudwatch-agent.log.pos
+      tag *
+      read_from_head true
+      <parse>
+        @type json
+        time_format %Y-%m-%dT%H:%M:%S.%NZ
+      </parse>
+    </source>
+
+    <source>
+      @type tail
+      @id in_tail_fluentd_logs
+      @label @fluentdlogs
+      path /var/log/containers/fluentd*
+      pos_file /var/log/fluentd.log.pos
+      tag *
+      read_from_head true
+      <parse>
+        @type json
+        time_format %Y-%m-%dT%H:%M:%S.%NZ
+      </parse>
+    </source>
+
+    <label @fluentdlogs>
+      <filter **>
+        @type kubernetes_metadata
+        @id filter_kube_metadata_fluentd
+      </filter>
+
+      <filter **>
+        @type record_transformer
+        @id filter_fluentd_stream_transformer
+        <record>
+          stream_name ${tag_parts[3]}
+        </record>
+      </filter>
+
+      <match **>
+        @type relabel
+        @label @NORMAL
+      </match>
+    </label>
+
     <label @containers>
       <filter **>
         @type kubernetes_metadata
         @id filter_kube_metadata
       </filter>
+
       <filter **>
         @type record_transformer
         @id filter_containers_stream_transformer
@@ -70,6 +122,52 @@ data:
           stream_name ${tag_parts[3]}
         </record>
       </filter>
+
+      <filter **>
+        @type concat
+        key log
+        multiline_start_regexp /^\S/
+        separator ""
+        flush_interval 5
+        timeout_label @NORMAL
+      </filter>
+
+      <match **>
+        @type relabel
+        @label @NORMAL
+      </match>
+    </label>
+
+    <label @cwagentlogs>
+      <filter **>
+        @type kubernetes_metadata
+        @id filter_kube_metadata_cwagent
+      </filter>
+
+      <filter **>
+        @type record_transformer
+        @id filter_cwagent_stream_transformer
+        <record>
+          stream_name ${tag_parts[3]}
+        </record>
+      </filter>
+
+      <filter **>
+        @type concat
+        key log
+        multiline_start_regexp /^\d{4}[-/]\d{1,2}[-/]\d{1,2}/
+        separator ""
+        flush_interval 5
+        timeout_label @NORMAL
+      </filter>
+
+      <match **>
+        @type relabel
+        @label @NORMAL
+      </match>
+    </label>
+
+    <label @NORMAL>
       <match **>
         @type cloudwatch_logs
         @id out_cloudwatch_logs_containers
@@ -97,10 +195,15 @@ data:
         field_map_strict true
       </entry>
       path /var/log/journal
-      pos_file /var/log/fluentd-journald-kubelet.pos
+      <storage>
+        @type local
+        persistent true
+        path /var/log/fluentd-journald-kubelet-pos.json
+      </storage>
       read_from_head true
       tag kubelet.service
     </source>
+
     <source>
       @type systemd
       @id in_systemd_kubeproxy
@@ -111,10 +214,15 @@ data:
         field_map_strict true
       </entry>
       path /var/log/journal
-      pos_file /var/log/fluentd-journald-kubeproxy.pos
+      <storage>
+        @type local
+        persistent true
+        path /var/log/fluentd-journald-kubeproxy-pos.json
+      </storage>
       read_from_head true
       tag kubeproxy.service
     </source>
+
     <source>
       @type systemd
       @id in_systemd_docker
@@ -125,15 +233,21 @@ data:
         field_map_strict true
       </entry>
       path /var/log/journal
-      pos_file /var/log/fluentd-journald-docker.pos
+      <storage>
+        @type local
+        persistent true
+        path /var/log/fluentd-journald-docker-pos.json
+      </storage>
       read_from_head true
       tag docker.service
     </source>
+
     <label @systemd>
       <filter **>
         @type kubernetes_metadata
         @id filter_kube_metadata_systemd
       </filter>
+
       <filter **>
         @type record_transformer
         @id filter_systemd_stream_transformer
@@ -141,6 +255,7 @@ data:
           stream_name ${tag}-${record["hostname"]}
         </record>
       </filter>
+
       <match **>
         @type cloudwatch_logs
         @id out_cloudwatch_logs_systemd
@@ -170,6 +285,7 @@ data:
         @type syslog
       </parse>
     </source>
+
     <source>
       @type tail
       @id in_tail_secure
@@ -182,6 +298,7 @@ data:
         @type syslog
       </parse>
     </source>
+
     <source>
       @type tail
       @id in_tail_messages
@@ -194,11 +311,13 @@ data:
         @type syslog
       </parse>
     </source>
+
     <label @hostlogs>
       <filter **>
         @type kubernetes_metadata
         @id filter_kube_metadata_host
       </filter>
+
       <filter **>
         @type record_transformer
         @id filter_containers_stream_transformer_host
@@ -206,6 +325,7 @@ data:
           stream_name ${tag}-${record["host"]}
         </record>
       </filter>
+
       <match host.**>
         @type cloudwatch_logs
         @id out_cloudwatch_logs_host_logs
@@ -223,14 +343,15 @@ data:
       </match>
     </label>
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: fluentd-cloudwatch
   namespace: amazon-cloudwatch
-  labels:
-    k8s-app: fluentd-cloudwatch
 spec:
+  selector:
+    matchLabels:
+      k8s-app: fluentd-cloudwatch
   template:
     metadata:
       labels:
@@ -246,7 +367,7 @@ spec:
       initContainers:
         - name: copy-fluentd-config
           image: busybox
-          command: ['sh', '-c', 'cp /config-volume/..data/* /fluentd/etc']
+          command: ["sh", "-c", "cp /config-volume/..data/* /fluentd/etc"]
           volumeMounts:
             - name: config-volume
               mountPath: /config-volume
@@ -254,10 +375,10 @@ spec:
               mountPath: /fluentd/etc
         - name: update-log-driver
           image: busybox
-          command: ['sh','-c','']
+          command: ["sh", "-c", ""]
       containers:
         - name: fluentd-cloudwatch
-          image: fluent/fluentd-kubernetes-daemonset:v1.3.3-debian-cloudwatch-1.4
+          image: fluent/fluentd-kubernetes-daemonset:v1.7.3-debian-cloudwatch-1.0
           env:
             - name: REGION
               valueFrom:
@@ -269,9 +390,11 @@ spec:
                 configMapKeyRef:
                   name: cluster-info
                   key: cluster.name
+            - name: CI_VERSION
+              value: "k8s/1.1.0"
           resources:
             limits:
-              memory: 200Mi
+              memory: 400Mi
             requests:
               cpu: 100m
               memory: 200Mi
