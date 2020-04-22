@@ -187,5 +187,15 @@ As experienced with version conflict issues, it's worth noting the softwares' ve
 
 - Install Travis from market place and link to project
 - Prepare the CI/CD plan within `.travis.yml` file in the root of project
-- In every new commit, check the Travis build result.
+- Configure environment variables
+  <p align="center">
+    <image src="./media/travis-environment-var.jpg" width="100%">
+  </p>
+  <p align="center"> <strong> Travis environment variables </strong><p>
+
+- Once committed, travis will push the new docker images to docker hub, and apply the changes to defined kubernetes cluster.
+  <p align="center">
+    <image src="./media/travis-deployment.jpg" width="100%">
+  </p>
+  <p align="center"> <strong> Travis environment variables </strong><p>
 
