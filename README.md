@@ -208,5 +208,5 @@ As experienced with version conflict issues, it's worth noting the softwares' ve
   <p align="center">
     <image src="./media/travis-deployment.jpg" width="75%">
   </p>
-  <p align="center"> <strong> Travis environment variables </strong><p>
+  <p align="center"> <strong> Travis build result </strong><p>
 
