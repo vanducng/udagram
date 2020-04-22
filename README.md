@@ -195,7 +195,7 @@ As experienced with version conflict issues, it's worth noting the softwares' ve
 
 - Once committed, travis will push the new docker images to docker hub, and apply the changes to defined kubernetes cluster.
   <p align="center">
-    <image src="./media/travis-deployment.jpg" width="100%">
+    <image src="./media/travis-deployment.jpg" width="80%">
   </p>
-  <p align="center"> <strong> Travis environment variables </strong><p>
+  <p align="center"> <strong> Travis build success </strong><p>
 

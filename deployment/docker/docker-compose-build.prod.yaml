@@ -15,4 +15,4 @@ services:
   frontend:
     build:
       context: ../../frontend
-    image: vanducng/frontend
+    image: vanducng/frontend:frontend_trial
