@@ -164,7 +164,18 @@ As experienced with version conflict issues, it's worth noting the softwares' ve
   <p align="center"> <strong> Kubernetes rolling update </strong><p>
 
 ### Kubernetes with 2 version running on same cluster for A/B testing purpose
-
+- Assume that we have a new features `frontend_trial` on frontend service, and it is considered to run in parallel with current one for A/B testing. It can be archived easily within Kubernetes by running the following.
+  ```bash
+  git checkout -b frontend_trial
+  sudo docker-compose -f deployment/docker/docker-compose-build.prod.yaml build --parallel
+  sudo docker-compose -f deployment/docker/docker-compose-build.prod.yaml push
+  kubectl apply -f deployment/k8s/frontend-deployment-trial.yaml
+  ```
+- Below screenshot showing the 2 versions are running simultaneously within our Kubernetes cluster.
+  <p align="center">
+  <image src="./media/kube-multi-versions.jpg" width="80%">
+  </p>
+  <p align="center"> <strong> Kubernetes multi-version deployed </strong><p>
 
 ### Deploy fluentd for Cloudwatch logging
 - Follow the a details instruction by AWS [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Container-Insights-setup-logs.html#ContainerInsights-verify-FluentD) to enable centralize logging capability.
@@ -195,7 +206,7 @@ As experienced with version conflict issues, it's worth noting the softwares' ve
 
 - Once committed, travis will push the new docker images to docker hub, and apply the changes to defined kubernetes cluster.
   <p align="center">
-    <image src="./media/travis-deployment.jpg" width="100%">
+    <image src="./media/travis-deployment.jpg" width="75%">
   </p>
   <p align="center"> <strong> Travis environment variables </strong><p>
 
