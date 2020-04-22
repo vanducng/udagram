@@ -26,7 +26,7 @@ As experienced with version conflict issues, it's worth noting the softwares' ve
     ```
 * From project directory, run below commands:
     ```bash
-    cd udacity-c3-deployment/docker
+    cd deployment/docker
     
     # Build images
     sudo docker-compose -f docker-compose-build.yaml build --parallel

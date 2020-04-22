@@ -16,7 +16,7 @@ spec:
         service: backend-feed
     spec:
       containers:
-      - image: vanducng/udacity-restapi-feed
+      - image: vanducng/restapi-feed
         name: backend-feed
         imagePullPolicy: Always  
         resources:

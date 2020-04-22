@@ -18,8 +18,8 @@ spec:
         api: external
     spec:
       containers:
-      # - image: vanducng/udacity-frontend:local
-      - image: vanducng/udacity-frontend
+      # - image: vanducng/frontend:local
+      - image: vanducng/frontend
         name: frontend
         imagePullPolicy: Always          
         ports:

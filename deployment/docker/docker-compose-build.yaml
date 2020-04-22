@@ -6,13 +6,13 @@ services:
     image: vanducng/reverseproxy 
   backend_user:
     build:
-      context: ../../udacity-c3-restapi-user
-    image: vanducng/udacity-restapi-user
+      context: ../../restapi-user
+    image: vanducng/restapi-user
   backend_feed:
     build:
-      context: ../../udacity-c3-restapi-feed
-    image: vanducng/udacity-restapi-feed
+      context: ../../restapi-feed
+    image: vanducng/restapi-feed
   frontend:
     build:
-      context: ../../udacity-c3-frontend
-    image: vanducng/udacity-frontend:local
+      context: ../../frontend
+    image: vanducng/frontend
